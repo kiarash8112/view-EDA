@@ -8,7 +8,6 @@ import (
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/lovoo/goka"
-	"github.com/lovoo/goka/codec"
 )
 
 var (
@@ -67,10 +66,26 @@ func createNewPaymentService() PaymentService {
 
 func runBookingEmitter() {
 	emitter, err := goka.NewEmitter(brokers, booking_topic,
-		new(codec.String))
+		new(BookingCodec))
 	if err != nil {
 		panic(err)
 	}
+
+	t := time.NewTicker(100 * time.Millisecond)
+	defer t.Stop()
+
+	var i int
+	for range t.C {
+		key := fmt.Sprintf("user-%d", i%10)
+		value := createNewBookingService()
+		emitter.EmitSync(key, &value)
+		i++
+	}
+
+	defer emitter.Finish()
+}
+
+func createNewBookingService() BookingService {
 	random := rand.Intn(3)
 	bookingStatus := map[int]Status{
 		0: success,
@@ -88,21 +103,9 @@ func runBookingEmitter() {
 		log.Panic("can't create random bookingID")
 	}
 
-	b := BookingService{
+	return BookingService{
 		HotelID:       hotelID,
 		BookingID:     bookingID,
 		BookingStatus: bookingStatus[random],
 	}
-
-	t := time.NewTicker(100 * time.Millisecond)
-	defer t.Stop()
-
-	var i int
-	for range t.C {
-		key := fmt.Sprintf("user-%d", i%10)
-		emitter.EmitSync(key, &b)
-		i++
-	}
-
-	defer emitter.Finish()
 }
