@@ -30,10 +30,10 @@ func runPaymentEmitter() {
 	}
 
 	status := rand.Intn(3)
-	paymentStatus := map[int]string{
-		0: "SUCCESS",
-		1: "IN_PROGRESS",
-		2: "FAILD",
+	paymentStatus := map[int]Status{
+		0: success,
+		1: in_progress,
+		2: faild,
 	}
 
 	t := time.NewTicker(100 * time.Millisecond)
@@ -57,10 +57,10 @@ func runBookingEmitter() {
 		panic(err)
 	}
 	status := rand.Intn(3)
-	bookingStatus := map[int]string{
-		0: "SUCCESS",
-		1: "IN_PROGRESS",
-		2: "FAILD",
+	bookingStatus := map[int]Status{
+		0: success,
+		1: in_progress,
+		2: faild,
 	}
 
 	t := time.NewTicker(100 * time.Millisecond)
