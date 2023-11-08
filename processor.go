@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	payment_group goka.Group = "payment_group"
-	booking_group goka.Group = "booking_group"
+	payment_group goka.Group = "payment_group3"
+	booking_group goka.Group = "booking_group3"
 )
 
 func paymentProcess(ctx goka.Context, msg interface{}) {
@@ -18,11 +18,12 @@ func paymentProcess(ctx goka.Context, msg interface{}) {
 	} else {
 		p = new(PaymentService)
 	}
-
+	p.BookingID = msg.(*PaymentService).BookingID
+	p.PaymentStatus = msg.(*PaymentService).PaymentStatus
 	ctx.SetValue(p)
 }
 
-func runPaymentProcessor(initialized chan struct{}) {
+func runPaymentProcessor() {
 	g := goka.DefineGroup(payment_group,
 		goka.Input(payment_topic, new(PaymentCodec), paymentProcess),
 		goka.Persist(new(PaymentCodec)),

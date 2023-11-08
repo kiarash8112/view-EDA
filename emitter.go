@@ -26,11 +26,26 @@ func init() {
 
 func runPaymentEmitter() {
 	emitter, err := goka.NewEmitter(brokers, payment_topic,
-		new(codec.String))
+		new(PaymentCodec))
 	if err != nil {
 		panic(err)
 	}
 
+	t := time.NewTicker(time.Millisecond * 100)
+	defer t.Stop()
+
+	var i int
+	for range t.C {
+		key := fmt.Sprintf("user-%d", i%10)
+		value := createNewPaymentService()
+		emitter.EmitSync(key, &value)
+		i++
+	}
+
+	defer emitter.Finish()
+}
+
+func createNewPaymentService() PaymentService {
 	random := rand.Intn(3)
 	paymentStatus := map[int]Status{
 		0: success,
@@ -43,22 +58,11 @@ func runPaymentEmitter() {
 		log.Panic("can't create random bookingID")
 	}
 
-	p := PaymentService{
+	return PaymentService{
 		BookingID:     bookingID,
 		PaymentStatus: paymentStatus[random],
 	}
 
-	t := time.NewTicker(100 * time.Millisecond)
-	defer t.Stop()
-
-	var i int
-	for range t.C {
-		key := fmt.Sprintf("user-%d", i%10)
-		emitter.EmitSync(key, &p)
-		i++
-	}
-
-	defer emitter.Finish()
 }
 
 func runBookingEmitter() {
