@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/lovoo/goka"
 	"github.com/lovoo/goka/codec"
 )
@@ -29,11 +31,21 @@ func runPaymentEmitter() {
 		panic(err)
 	}
 
-	status := rand.Intn(3)
+	random := rand.Intn(3)
 	paymentStatus := map[int]Status{
 		0: success,
 		1: in_progress,
 		2: faild,
+	}
+
+	bookingID, err := uuid.GenerateUUID()
+	if err != nil {
+		log.Panic("can't create random bookingID")
+	}
+
+	p := PaymentService{
+		BookingID:     bookingID,
+		PaymentStatus: paymentStatus[random],
 	}
 
 	t := time.NewTicker(100 * time.Millisecond)
@@ -42,8 +54,7 @@ func runPaymentEmitter() {
 	var i int
 	for range t.C {
 		key := fmt.Sprintf("user-%d", i%10)
-		value := paymentStatus[status]
-		emitter.EmitSync(key, value)
+		emitter.EmitSync(key, &p)
 		i++
 	}
 
@@ -56,11 +67,27 @@ func runBookingEmitter() {
 	if err != nil {
 		panic(err)
 	}
-	status := rand.Intn(3)
+	random := rand.Intn(3)
 	bookingStatus := map[int]Status{
 		0: success,
 		1: in_progress,
 		2: faild,
+	}
+
+	bookingID, err := uuid.GenerateUUID()
+	if err != nil {
+		log.Panic("can't create random bookingID")
+	}
+
+	hotelID, err := uuid.GenerateUUID()
+	if err != nil {
+		log.Panic("can't create random bookingID")
+	}
+
+	b := BookingService{
+		HotelID:       hotelID,
+		BookingID:     bookingID,
+		BookingStatus: bookingStatus[random],
 	}
 
 	t := time.NewTicker(100 * time.Millisecond)
@@ -69,8 +96,7 @@ func runBookingEmitter() {
 	var i int
 	for range t.C {
 		key := fmt.Sprintf("user-%d", i%10)
-		value := bookingStatus[status]
-		emitter.EmitSync(key, value)
+		emitter.EmitSync(key, &b)
 		i++
 	}
 
