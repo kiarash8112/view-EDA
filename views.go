@@ -29,12 +29,23 @@ func runView() {
 
 	root := mux.NewRouter()
 	root.HandleFunc("/{key}", func(w http.ResponseWriter, r *http.Request) {
+		view := ViewResult{}
 		payment, _ := paymentView.Get(mux.Vars(r)["key"])
-		data, _ := json.Marshal(payment)
-		w.Write(data)
+		paymentService := payment.(*PaymentService)
 
-		payment, _ = bookingView.Get(mux.Vars(r)["key"])
-		data, _ = json.Marshal(payment)
+		view.BookingID = paymentService.BookingID
+		view.PaymentStatus = paymentService.PaymentStatus
+
+		booking, _ := bookingView.Get(mux.Vars(r)["key"])
+		bookingService := booking.(*BookingService)
+
+		view.HotelID = bookingService.HotelID
+		view.BookingStatus = bookingService.BookingStatus
+
+		data, err := json.Marshal(view)
+		if err != nil {
+			fmt.Printf("err: %v\n", err)
+		}
 		w.Write(data)
 	})
 	fmt.Println("View opened at http://localhost:9095/")

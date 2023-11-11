@@ -69,3 +69,10 @@ func (*PaymentCodec) Decode(data []byte) (interface{}, error) {
 	}
 	return &p, nil
 }
+
+type ViewResult struct {
+	BookingID     string
+	HotelID       string
+	BookingStatus Status
+	PaymentStatus Status
+}
