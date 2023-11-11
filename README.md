@@ -20,8 +20,31 @@ composition of rich cross-cutting views.
 
 # Implemention
 i used [goka](https://github.com/lovoo/goka) package to implement this architecture 
-goka seperate to three section 
+goka seperate to three section(details about each section is availabe [here](https://github.com/lovoo/goka/wiki/Introduction))
 
 ![goka](https://github.com/kiarash8112/view-EDA/assets/133909368/54ecd6f4-f815-4494-80ee-201f6a6f87ef)
 
  
+i created request creator to simulate this scenario each request emit to emitter with two topics: payment,booking.
+
+processor collect request through kafka message broker and update information in the database
+
+after that view cache info and return it through http calls
+
+# How to get it running 
+
+```bash
+# kafka and zookeeper must be running, 
+# you can start them with docker-compose up
+
+# run the example
+go run .
+```
+
+This should output something like
+```
+View opened at http://localhost:9095/
+2023/11/11 11:29:50 [Processor booking_group1] setup generation 1, claims=map[string][]int32{"booking1":[]int32{0, 1, 2, 3, 4, 5, 6, 7}}
+2023/11/11 11:29:50 [Processor payment_group1] setup generation 1, claims=map[string][]int32{"payment1":[]int32{0, 1, 2, 3, 4, 5, 6, 7}}
+```
+Now open the browser and get the view for user-3: http://localhost:9095/user-3 (if you reload you get new requests results)
