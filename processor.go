@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	payment_group goka.Group = "payment_group1"
-	booking_group goka.Group = "booking_group1"
+	payment_group goka.Group = "payment_group"
+	booking_group goka.Group = "booking_group"
 )
 
 func paymentProcess(ctx goka.Context, msg interface{}) {

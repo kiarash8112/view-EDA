@@ -31,26 +31,27 @@ func runView() {
 	root.HandleFunc("/{key}", func(w http.ResponseWriter, r *http.Request) {
 		views := []ViewResult{}
 		payments, _ := paymentView.Get(mux.Vars(r)["key"])
-		paymentInstances := payments.([]PaymentService)
+		if payments != nil {
+			paymentInstances := payments.([]PaymentService)
 
-		bookings, _ := bookingView.Get(mux.Vars(r)["key"])
-		bookingInstances := bookings.([]BookingService)
-
-		fmt.Println(len(paymentInstances), len(bookingInstances))
-		for index, payment := range paymentInstances {
-			view := ViewResult{}
-			view.BookingID = payment.BookingID
-			view.PaymentStatus = payment.PaymentStatus
-			if !(payment.PaymentStatus == faild) {
-				view.HotelID = bookingInstances[index].HotelID
-				view.BookingStatus = bookingInstances[index].BookingStatus
-			} else {
-				view.HotelID = bookingInstances[index].HotelID
-				view.BookingStatus = faild
+			bookings, _ := bookingView.Get(mux.Vars(r)["key"])
+			bookingInstances := bookings.([]BookingService)
+			if bookingInstances != nil {
+				for index, payment := range paymentInstances {
+					view := ViewResult{}
+					view.BookingID = payment.BookingID
+					view.PaymentStatus = payment.PaymentStatus
+					if !(payment.PaymentStatus == faild) {
+						view.HotelID = bookingInstances[index].HotelID
+						view.BookingStatus = bookingInstances[index].BookingStatus
+					} else {
+						view.HotelID = bookingInstances[index].HotelID
+						view.BookingStatus = faild
+					}
+					views = append(views, view)
+				}
 			}
-			views = append(views, view)
 		}
-
 		data, err := json.Marshal(views)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)

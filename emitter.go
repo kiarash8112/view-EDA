@@ -9,8 +9,8 @@ import (
 
 var (
 	brokers                   = []string{"127.0.0.1:9092"}
-	payment_topic goka.Stream = "payment1"
-	booking_topic goka.Stream = "booking1"
+	payment_topic goka.Stream = "payment"
+	booking_topic goka.Stream = "booking"
 	tmc           *goka.TopicManagerConfig
 )
 
