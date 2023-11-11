@@ -42,6 +42,18 @@ func (*BookingCodec) Decode(data []byte) (interface{}, error) {
 	return &b, nil
 }
 
+type BookingListCodec struct{}
+
+func (c *BookingListCodec) Encode(value interface{}) ([]byte, error) {
+	return json.Marshal(value)
+}
+
+func (c *BookingListCodec) Decode(data []byte) (interface{}, error) {
+	var b []BookingService
+	err := json.Unmarshal(data, &b)
+	return b, err
+}
+
 type PaymentService struct {
 	BookingID     string
 	PaymentStatus Status
@@ -68,6 +80,18 @@ func (*PaymentCodec) Decode(data []byte) (interface{}, error) {
 		return nil, fmt.Errorf("Error unmarshaling PaymentService: %v", err)
 	}
 	return &p, nil
+}
+
+type PaymentListCodec struct{}
+
+func (c *PaymentListCodec) Encode(value interface{}) ([]byte, error) {
+	return json.Marshal(value)
+}
+
+func (c *PaymentListCodec) Decode(data []byte) (interface{}, error) {
+	var p []PaymentService
+	err := json.Unmarshal(data, &p)
+	return p, err
 }
 
 type ViewResult struct {
