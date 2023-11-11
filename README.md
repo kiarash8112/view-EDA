@@ -20,7 +20,7 @@ composition of rich cross-cutting views.
 
 # Implemention
 i used [goka](https://github.com/lovoo/goka) package to implement this architecture 
-goka seperate to three section(details about each section is availabe [here](https://github.com/lovoo/goka/wiki/Introduction))
+goka seperate to three sections(details about each section is availabe [here](https://github.com/lovoo/goka/wiki/Introduction))
 
 ![goka](https://github.com/kiarash8112/view-EDA/assets/133909368/54ecd6f4-f815-4494-80ee-201f6a6f87ef)
 
