@@ -7,26 +7,26 @@ import (
 )
 
 var (
-	payment_group goka.Group = "payment_group"
-	booking_group goka.Group = "booking_group"
+	payment_group goka.Group = "payment_group1"
+	booking_group goka.Group = "booking_group1"
 )
 
 func paymentProcess(ctx goka.Context, msg interface{}) {
-	var p *PaymentService
-	if val := ctx.Value(); val != nil {
-		p = val.(*PaymentService)
-	} else {
-		p = new(PaymentService)
+	var p1 []PaymentService
+	if v := ctx.Value(); v != nil {
+		p1 = v.([]PaymentService)
 	}
-	p.BookingID = msg.(*PaymentService).BookingID
-	p.PaymentStatus = msg.(*PaymentService).PaymentStatus
-	ctx.SetValue(p)
+
+	p := msg.(*PaymentService)
+	p1 = append(p1, *p)
+
+	ctx.SetValue(p1)
 }
 
 func runPaymentProcessor() {
 	g := goka.DefineGroup(payment_group,
 		goka.Input(payment_topic, new(PaymentCodec), paymentProcess),
-		goka.Persist(new(PaymentCodec)),
+		goka.Persist(new(PaymentListCodec)),
 	)
 	p, err := goka.NewProcessor(brokers,
 		g,
@@ -41,22 +41,21 @@ func runPaymentProcessor() {
 }
 
 func BookingProcess(ctx goka.Context, msg interface{}) {
-	var b *BookingService
-	if val := ctx.Value(); val != nil {
-		b = val.(*BookingService)
-	} else {
-		b = new(BookingService)
+	var b1 []BookingService
+	if v := ctx.Value(); v != nil {
+		b1 = v.([]BookingService)
 	}
-	b.BookingID = msg.(*BookingService).BookingID
-	b.BookingStatus = msg.(*BookingService).BookingStatus
-	b.HotelID = msg.(*BookingService).HotelID
-	ctx.SetValue(b)
+
+	b := msg.(*BookingService)
+	b1 = append(b1, *b)
+
+	ctx.SetValue(b1)
 }
 
 func runBookingProcessor() {
 	g := goka.DefineGroup(booking_group,
 		goka.Input(booking_topic, new(BookingCodec), BookingProcess),
-		goka.Persist(new(BookingCodec)),
+		goka.Persist(new(BookingListCodec)),
 	)
 	p, err := goka.NewProcessor(brokers,
 		g,

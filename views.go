@@ -13,7 +13,7 @@ import (
 func runView() {
 	paymentView, err := goka.NewView(brokers,
 		goka.GroupTable(payment_group),
-		new(PaymentCodec),
+		new(PaymentListCodec),
 	)
 	if err != nil {
 		panic(err)
@@ -21,7 +21,7 @@ func runView() {
 
 	bookingView, err := goka.NewView(brokers,
 		goka.GroupTable(booking_group),
-		new(BookingCodec),
+		new(BookingListCodec),
 	)
 	if err != nil {
 		panic(err)
@@ -29,20 +29,29 @@ func runView() {
 
 	root := mux.NewRouter()
 	root.HandleFunc("/{key}", func(w http.ResponseWriter, r *http.Request) {
-		view := ViewResult{}
-		payment, _ := paymentView.Get(mux.Vars(r)["key"])
-		paymentService := payment.(*PaymentService)
+		views := []ViewResult{}
+		payments, _ := paymentView.Get(mux.Vars(r)["key"])
+		paymentInstances := payments.([]PaymentService)
 
-		view.BookingID = paymentService.BookingID
-		view.PaymentStatus = paymentService.PaymentStatus
+		bookings, _ := bookingView.Get(mux.Vars(r)["key"])
+		bookingInstances := bookings.([]BookingService)
 
-		booking, _ := bookingView.Get(mux.Vars(r)["key"])
-		bookingService := booking.(*BookingService)
+		fmt.Println(len(paymentInstances), len(bookingInstances))
+		for index, payment := range paymentInstances {
+			view := ViewResult{}
+			view.BookingID = payment.BookingID
+			view.PaymentStatus = payment.PaymentStatus
+			if !(payment.PaymentStatus == faild) {
+				view.HotelID = bookingInstances[index].HotelID
+				view.BookingStatus = bookingInstances[index].BookingStatus
+			} else {
+				view.HotelID = bookingInstances[index].HotelID
+				view.BookingStatus = faild
+			}
+			views = append(views, view)
+		}
 
-		view.HotelID = bookingService.HotelID
-		view.BookingStatus = bookingService.BookingStatus
-
-		data, err := json.Marshal(view)
+		data, err := json.Marshal(views)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 		}
