@@ -7,6 +7,10 @@ import (
 	"github.com/lovoo/goka"
 )
 
+func init() {
+	go createRequest()
+}
+
 func main() {
 	tm, err := goka.NewTopicManager(brokers, goka.DefaultConfig(), tmc)
 	if err != nil {

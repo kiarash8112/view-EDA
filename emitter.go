@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"math/rand"
 	"time"
 
-	"github.com/hashicorp/go-uuid"
 	"github.com/lovoo/goka"
 )
 
@@ -30,38 +27,17 @@ func runPaymentEmitter() {
 		panic(err)
 	}
 
-	t := time.NewTicker(time.Millisecond * 100)
+	t := time.NewTicker(time.Millisecond*100 + time.Millisecond*10)
 	defer t.Stop()
 
 	var i int
 	for range t.C {
 		key := fmt.Sprintf("user-%d", i%10)
-		value := createNewPaymentService()
-		emitter.EmitSync(key, &value)
+		emitter.EmitSync(key, &_PaymentService)
 		i++
 	}
 
 	defer emitter.Finish()
-}
-
-func createNewPaymentService() PaymentService {
-	random := rand.Intn(3)
-	paymentStatus := map[int]Status{
-		0: success,
-		1: in_progress,
-		2: faild,
-	}
-
-	bookingID, err := uuid.GenerateUUID()
-	if err != nil {
-		log.Panic("can't create random bookingID")
-	}
-
-	return PaymentService{
-		BookingID:     bookingID,
-		PaymentStatus: paymentStatus[random],
-	}
-
 }
 
 func runBookingEmitter() {
@@ -71,41 +47,15 @@ func runBookingEmitter() {
 		panic(err)
 	}
 
-	t := time.NewTicker(100 * time.Millisecond)
+	t := time.NewTicker(time.Millisecond*100 + time.Millisecond*10)
 	defer t.Stop()
 
 	var i int
 	for range t.C {
 		key := fmt.Sprintf("user-%d", i%10)
-		value := createNewBookingService()
-		emitter.EmitSync(key, &value)
+		emitter.EmitSync(key, &_BookingService)
 		i++
 	}
 
 	defer emitter.Finish()
-}
-
-func createNewBookingService() BookingService {
-	random := rand.Intn(3)
-	bookingStatus := map[int]Status{
-		0: success,
-		1: in_progress,
-		2: faild,
-	}
-
-	bookingID, err := uuid.GenerateUUID()
-	if err != nil {
-		log.Panic("can't create random bookingID")
-	}
-
-	hotelID, err := uuid.GenerateUUID()
-	if err != nil {
-		log.Panic("can't create random bookingID")
-	}
-
-	return BookingService{
-		HotelID:       hotelID,
-		BookingID:     bookingID,
-		BookingStatus: bookingStatus[random],
-	}
 }
